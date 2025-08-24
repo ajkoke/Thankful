@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Thankful</string>
+    <string name="thankful_for">Thankful for</string>
+    <string name="give_thanks">Give Thanks</string>
+    <string name="i_m_thankful_for">I\'m Thankful For</string>
 </resources>

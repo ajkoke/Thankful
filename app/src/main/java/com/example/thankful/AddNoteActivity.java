@@ -1,61 +1,92 @@
-package com.example.thankful.Adapters;
+package com.example.thankful;
 
-import android.content.Context;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import android.os.Bundle;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.thankful.Adapters.NotesAdapter;
+import com.example.thankful.Database.RoomDataB;
 import com.example.thankful.Model.Notes;
-import com.example.thankful.R;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import java.util.List;
 
-public class NotesAdapter extends RecyclerView.Adapter<NotesAdapter.ViewHolder> {
+public class AddNoteActivity extends AppCompatActivity {
 
-    private Context context;
-    private List<Notes> notesList;
-
-    public NotesAdapter(Context context, List<Notes> notesList) {
-        this.context = context;
-        this.notesList = notesList;
-    }
-
-    @NonNull
-    @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.note_item, parent, false);
-        return new ViewHolder(view);
-    }
+    private EditText editTextTitle, editTextNote; //, titleInput, contentInput;
+    private Button saveButton;
+ //   private RecyclerView recyclerView;
+    private NotesAdapter adapter;
+    private RoomDataB db;
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Notes note = notesList.get(position);
-        holder.title.setText(note.getTitle());
-        holder.content.setText(note.getNotes());
-    }
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_add_note);
 
-    @Override
-    public int getItemCount() {
-        return notesList.size();
-    }
+        // Init views
+//        titleInput = findViewById(R.id.editTextTitle);
+//        contentInput = findViewById(R.id.editTextNote);
+        editTextTitle = findViewById(R.id.editTextTitle);
+        editTextNote = findViewById(R.id.editTextNote);
+        saveButton = findViewById(R.id.saveButton);
+      /*  recyclerView = findViewById(R.id.recyclerViewNotes); */
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView title, content;
+        // Initialze database
+        db = RoomDataB.getInstance(this);
 
-        public ViewHolder(@NonNull View itemView) {
-            super(itemView);
-            title = itemView.findViewById(R.id.noteTitle);
-            content = itemView.findViewById(R.id.noteContent);
-        }
-    }
+        // Setup RecyclerView
+     //   recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        List<Notes> notesList = db.MainDAO().getAll();
+        adapter = new NotesAdapter(notesList, note -> {
+            Toast.makeText(this, "Clicked: " + note.getTitle(), Toast.LENGTH_SHORT).show();
+        });
+      //  recyclerView.setAdapter(adapter);
 
-    // <-- Add this method here inside NotesAdapter
-    public void updateList(List<Notes> newList) {
-        this.notesList = newList;
-        notifyDataSetChanged();
+        // Save button logic
+        saveButton.setOnClickListener(v -> {
+            String title = editTextTitle.getText().toString().trim();
+            String noteContent = editTextNote.getText().toString().trim();
+            if (title.isEmpty() && noteContent.isEmpty()) {
+                Toast.makeText(this, "Please enter something", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            // Format date
+            String currentDate = new SimpleDateFormat("MMM dd, yyyy hh:mm a", Locale.getDefault())
+                    .format(new Date());
+            Notes newNote = new Notes();
+            newNote.setTitle(title.isEmpty() ? "Unspecified thanks" : title);
+            newNote.setNotes(noteContent);
+            //newNote.setDate(String.valueOf(System.currentTimeMillis()));
+            newNote.setDate(currentDate);
+
+            db.MainDAO().insert(newNote);
+
+            Toast.makeText(this, "Thankful Note saved!", Toast.LENGTH_SHORT).show();
+            setResult(RESULT_OK);
+            finish(); // go back to MainActivity
+        });
+//            String content = contentInput.getText().toString().trim();
+
+ //           if (!title.isEmpty() && !content.isEmpty()) {
+ //             //  Notes note = new Notes(title, content, "Today");
+ //               Notes note = new Notes();
+ //               db.MainDAO().insert(note);
+
+                // Refresh list
+//                adapter.updateList(db.MainDAO().getAll());
+//               titleInput.setText("");
+//                contentInput.setText("");
+//            } else {
+//                Toast.makeText(this, "Please fill in all fields", Toast.LENGTH_SHORT).show();
+//            }
+//        });
     }
 }
