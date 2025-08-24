@@ -53,3 +53,8 @@ Thankful is an Android application that allows users to create and manage notes.
 ## Changelog
 
 - **Version 2:** Redid project to support Java and XML
+
+
+---
+
+For detailed documentation and wireframes, see the [Project Wiki](https://github.com/ajkoke/Thankful/wiki/Project-Outline).
